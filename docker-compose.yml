@@ -11,10 +11,11 @@ services:
     volumes:
       - ./backend/flights.json:/app/flights.json
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5001/api/health"]
+      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:5001/api/health || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 10s
 
   frontend:
     build: ./frontend
