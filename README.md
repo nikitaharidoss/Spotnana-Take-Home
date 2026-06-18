@@ -20,13 +20,15 @@ docker-compose up
 
 Then open http://localhost:3000 in your browser.
 
+The backend API runs on http://localhost:5001 (exposed port).
+
 ### Run Locally
 
 **Backend:**
 ```bash
 cd backend
 npm install
-npm start  # Starts on http://localhost:5000
+npm start  # Starts on http://localhost:5001
 ```
 
 **Frontend** (in another terminal):
@@ -143,13 +145,13 @@ skypath/
 ### GET /api/health
 Health check endpoint
 ```bash
-curl http://localhost:5000/api/health
+curl http://localhost:5001/api/health
 ```
 
 ### GET /api/airports
 Get list of available airports
 ```bash
-curl http://localhost:5000/api/airports
+curl http://localhost:5001/api/airports
 ```
 
 Response:
@@ -169,7 +171,7 @@ Response:
 ### POST /api/search
 Search for flights
 ```bash
-curl -X POST http://localhost:5000/api/search \
+curl -X POST http://localhost:5001/api/search \
   -H "Content-Type: application/json" \
   -d '{
     "origin": "JFK",
@@ -243,11 +245,11 @@ All 6 test cases from requirements pass:
 **To test manually:**
 ```bash
 # Test case 1: Direct flights + connections
-curl -X POST http://localhost:5000/api/search -H "Content-Type: application/json" \
+curl -X POST http://localhost:5001/api/search -H "Content-Type: application/json" \
   -d '{"origin":"JFK","destination":"LAX","date":"2024-03-15"}'
 
 # Test case 4: Same airport (should fail)
-curl -X POST http://localhost:5000/api/search -H "Content-Type: application/json" \
+curl -X POST http://localhost:5001/api/search -H "Content-Type: application/json" \
   -d '{"origin":"JFK","destination":"JFK","date":"2024-03-15"}'
 ```
 
@@ -309,7 +311,7 @@ curl -X POST http://localhost:5000/api/search -H "Content-Type: application/json
 ## Environment Variables
 
 **Backend:**
-- `PORT`: Server port (default: 5000)
+- `PORT`: Server port (default: 5001)
 - `NODE_ENV`: Environment (default: production)
 
 **Frontend:**
