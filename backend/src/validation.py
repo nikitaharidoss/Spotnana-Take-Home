@@ -5,13 +5,6 @@ MIN_LAYOVER_DOMESTIC = 45  # minutes
 MAX_LAYOVER = 360  # 6 hours
 MIN_LAYOVER_INTERNATIONAL = 90  # minutes
 
-def is_domestic(country_from, country_to):
-    """Determine if connection is domestic"""
-    return country_from == country_to
-
-def get_min_layover(country_from, country_to):
-    """Determine minimum layover required based on connection type"""
-    return MIN_LAYOVER_DOMESTIC if is_domestic(country_from, country_to) else MIN_LAYOVER_INTERNATIONAL
 
 def validate_connection(arrival_flight, departing_flight, airport_map, search_date):
     """Validate a potential connection between two flights"""
@@ -43,7 +36,8 @@ def validate_connection(arrival_flight, departing_flight, airport_map, search_da
     origin_country = airport_map[arrival_flight['origin']]['country']
     dest_country = airport_map[departing_flight['destination']]['country']
     
-    min_layover_required = get_min_layover(origin_country, dest_country)
+    is_domestic = origin_country == dest_country
+    min_layover_required = MIN_LAYOVER_DOMESTIC if is_domestic else MIN_LAYOVER_INTERNATIONAL
     
     # Check min layover
     if layover_minutes < min_layover_required:
@@ -64,6 +58,7 @@ def validate_connection(arrival_flight, departing_flight, airport_map, search_da
         'layover_minutes': layover_minutes,
         'min_layover_required': min_layover_required
     }
+
 
 def validate_search_input(origin, destination, date):
     """Validate search inputs"""
@@ -91,6 +86,7 @@ def validate_search_input(origin, destination, date):
         'valid': len(errors) == 0,
         'errors': errors
     }
+
 
 def airport_exists(code, airport_map):
     """Check if airport exists"""
