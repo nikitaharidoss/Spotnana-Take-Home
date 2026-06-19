@@ -8,10 +8,8 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=5001
-    volumes:
-      - ./backend/flights.json:/app/flights.json
     healthcheck:
-      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:5001/api/health || exit 1"]
+      test: ["CMD", "curl", "-f", "http://localhost:5001/api/health"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -22,8 +20,7 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      backend:
-        condition: service_healthy
+      - backend
     environment:
       - REACT_APP_API_URL=http://backend:5001
 

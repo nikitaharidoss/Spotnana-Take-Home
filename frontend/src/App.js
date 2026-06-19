@@ -43,15 +43,15 @@ function App() {
       if (!response.ok) {
         const errorData = await response.json();
         setError(errorData.details ? errorData.details.join(', ') : 'Search failed');
-        setResults(null);
+        setResults([]);
       } else {
         const data = await response.json();
-        setResults(data.results);
+        setResults(Array.isArray(data.itineraries) ? data.itineraries : []);
         setError(null);
       }
     } catch (err) {
       setError('Network error. Please check that the backend server is running.');
-      setResults(null);
+      setResults([]);
     } finally {
       setLoading(false);
     }
@@ -71,7 +71,7 @@ function App() {
 
         {loading && <div className="loading">Searching flights...</div>}
 
-        {results !== null && (
+        {results && (
           <Results 
             searchParams={searchParams}
             itineraries={results}

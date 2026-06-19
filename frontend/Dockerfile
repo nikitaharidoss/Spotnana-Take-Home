@@ -1,4 +1,4 @@
-FROM node:18-alpine
+FROM node:18-alpine AS builder
 
 WORKDIR /app
 
@@ -7,10 +7,27 @@ RUN npm install
 
 COPY . .
 
-ENV REACT_APP_API_URL=http://localhost:5000
-
 RUN npm run build
+
+FROM nginx:alpine
+
+COPY --from=builder /app/build /usr/share/nginx/html
+
+RUN echo 'server { \
+  listen 3000; \
+  location / { \
+    root /usr/share/nginx/html; \
+    try_files $uri $uri/ /index.html; \
+  } \
+  location /api/ { \
+    proxy_pass http://backend:5001; \
+    proxy_set_header Host $host; \
+    proxy_set_header X-Real-IP $remote_addr; \
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; \
+    proxy_set_header X-Forwarded-Proto $scheme; \
+  } \
+}' > /etc/nginx/conf.d/default.conf
 
 EXPOSE 3000
 
-CMD ["npm", "start"]
+CMD ["nginx", "-g", "daemon off;"]

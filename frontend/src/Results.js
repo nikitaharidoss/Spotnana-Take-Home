@@ -1,6 +1,10 @@
 import React from 'react';
 
 function Results({ searchParams, itineraries, airports }) {
+  if (!searchParams || !itineraries) {
+    return null;
+  }
+
   if (itineraries.length === 0) {
     return (
       <div className="results">
