@@ -16,7 +16,7 @@ class FlightSearcher:
         """Search for flights with connections"""
         available_flights = self._get_flights_for_date(origin, date)
         itineraries = []
-        
+
         # 1. Direct flights
         itineraries.extend(self._find_direct_flights(available_flights, destination))
         
@@ -30,6 +30,13 @@ class FlightSearcher:
         itineraries.sort(key=lambda x: x['totalDuration'])
         
         return itineraries
+    
+    def search_2(self, origin, destination, date):
+        """Search for flights with at most two stops"""
+        # This method currently delegates to the main search method, which already handles up to two stops
+        # and returns the same results
+
+        return self.search(origin, destination, date)
     
     def _get_flights_for_date(self, depart_airport_code, search_date):
         """Get flights departing from airport on search date"""
