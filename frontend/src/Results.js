@@ -29,7 +29,7 @@ function Results({ searchParams, itineraries, airports }) {
       <div className="results-header">
         <h2>Available Flights</h2>
         <p className="result-count">
-          Found {itineraries.length} itinerary{itineraries.length !== 1 ? 'ies' : ''} (sorted by
+          Found {itineraries.length} itineraries (sorted by
           shortest travel time)
         </p>
       </div>
@@ -62,6 +62,7 @@ function Results({ searchParams, itineraries, airports }) {
                   <div className="flight-segment">
                     <div className="segment-times">
                       <div className="time-block">
+                        <div className="date">{segment.departure.isoTime.split('T')[0]}</div>
                         <div className="time">{segment.departure.time}</div>
                         <div className="airport-info">
                           <div className="airport-code">{segment.departure.airport}</div>
@@ -78,6 +79,7 @@ function Results({ searchParams, itineraries, airports }) {
                       </div>
 
                       <div className="time-block">
+                        <div className="date">{segment.arrival.isoTime.split('T')[0]}</div>
                         <div className="time">{segment.arrival.time}</div>
                         <div className="airport-info">
                           <div className="airport-code">{segment.arrival.airport}</div>

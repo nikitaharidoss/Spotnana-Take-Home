@@ -288,6 +288,12 @@ html, body {
   text-align: center;
 }
 
+.date {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 0.25rem;
+}
+
 .time {
   font-size: 1.3rem;
   font-weight: 700;
