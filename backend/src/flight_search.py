@@ -156,7 +156,6 @@ class FlightSearcher:
                 'departure': {
                     'airport': flight['origin'],
                     'airportName': origin_airport['name'],
-                    'date': depart_local.strftime('%Y-%m-%d'),
                     'time': format_time(flight['departureTime'], origin_airport['timezone']),
                     'isoTime': flight['departureTime'],
                     'city': origin_airport['city'],
@@ -165,7 +164,6 @@ class FlightSearcher:
                 'arrival': {
                     'airport': flight['destination'],
                     'airportName': dest_airport['name'],
-                    'date': arrive_local.strftime('%Y-%m-%d'),
                     'time': format_time(flight['arrivalTime'], dest_airport['timezone']),
                     'isoTime': flight['arrivalTime'],
                     'city': dest_airport['city'],
