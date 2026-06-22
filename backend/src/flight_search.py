@@ -139,15 +139,11 @@ class FlightSearcher:
             # Add layover if not last segment
             if i < len(flight_segments) - 1:
                 next_flight = flight_segments[i + 1]
-                next_tz = pytz.timezone(self.airport_map[next_flight['origin']]['timezone'])
-                next_depart_local = datetime.strptime(
-                    next_flight['departureTime'],
-                    '%Y-%m-%dT%H:%M:%S'
-                )
-                next_depart_local = next_tz.localize(next_depart_local)
-                next_depart_utc = next_depart_local.astimezone(pytz.utc)
-                
-                layover_minutes = int((next_depart_utc - arrive_utc).total_seconds() / 60)
+                # Both times are at the same connection airport (same timezone),
+                # so naive subtraction is correct — no UTC conversion needed.
+                next_depart = datetime.strptime(next_flight['departureTime'], '%Y-%m-%dT%H:%M:%S')
+                arrive = datetime.strptime(flight['arrivalTime'], '%Y-%m-%dT%H:%M:%S')
+                layover_minutes = int((next_depart - arrive).total_seconds() / 60)
                 
                 segments[i]['layover'] = {
                     'airport': flight['destination'],

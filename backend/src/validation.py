@@ -1,5 +1,4 @@
 from datetime import datetime
-import pytz
 
 MIN_LAYOVER_DOMESTIC = 45  # minutes
 MAX_LAYOVER = 360  # 6 hours
@@ -11,26 +10,14 @@ def validate_connection(arrival_flight, departing_flight, airport_map, search_da
     # Flights must be at same airport
     if arrival_flight['destination'] != departing_flight['origin']:
         return {'valid': False, 'reason': 'Airports do not match'}
-    
-    airport = airport_map[arrival_flight['destination']]
-    timezone = airport['timezone']
-    
-    # Parse times in airport timezone
-    arrival_time_local = datetime.strptime(
-        arrival_flight['arrivalTime'],
-        '%Y-%m-%dT%H:%M:%S'
-    )
-    tz = pytz.timezone(timezone)
-    arrival_time_local = tz.localize(arrival_time_local)
-    
-    departure_time_local = datetime.strptime(
-        departing_flight['departureTime'],
-        '%Y-%m-%dT%H:%M:%S'
-    )
-    departure_time_local = tz.localize(departure_time_local)
-    
+
+    # Both times are already in the local time of the connection airport,
+    # so naive datetime subtraction is correct — no timezone conversion needed.
+    arrival_time = datetime.strptime(arrival_flight['arrivalTime'], '%Y-%m-%dT%H:%M:%S')
+    departure_time = datetime.strptime(departing_flight['departureTime'], '%Y-%m-%dT%H:%M:%S')
+
     # Calculate layover duration
-    layover_minutes = int((departure_time_local - arrival_time_local).total_seconds() / 60)
+    layover_minutes = int((departure_time - arrival_time).total_seconds() / 60)
     
     # Determine connection type (domestic or international)
     origin_country = airport_map[arrival_flight['origin']]['country']
