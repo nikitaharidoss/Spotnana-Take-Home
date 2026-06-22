@@ -105,11 +105,7 @@ function App() {
 
       <div className="app-content">
         <header className="header">
-          <h1>✈️ SkyPath</h1>
-          <p>Flight Connection Search Engine</p>
-          <span className="destination-badge">
-            Exploring {destinationBackgrounds[activeBackgroundIndex].name}
-          </span>
+          <h1>SkyPath</h1>
         </header>
 
         <main className="main">
