@@ -52,22 +52,22 @@ def validate_search_input(origin, destination, date):
     errors = []
     
     if not origin or len(origin) != 3:
-        errors.append('Origin must be a valid 3-letter airport code')
+        errors.append('ERROR: Origin must be a valid 3-letter airport code.')
     
     if not destination or len(destination) != 3:
-        errors.append('Destination must be a valid 3-letter airport code')
+        errors.append('ERROR: Destination must be a valid 3-letter airport code.')
     
     if origin and destination and origin == destination:
-        errors.append('Origin and destination cannot be the same')
+        errors.append('ERROR: Origin and destination cannot be the same.')
     
     try:
         parsed_date = datetime.strptime(date, '%Y-%m-%d')
     except (ValueError, TypeError):
-        errors.append('Date must be in YYYY-MM-DD format')
+        errors.append('ERROR: Date must be in YYYY-MM-DD format.')
         parsed_date = None
     
     if parsed_date and parsed_date < datetime(2024, 3, 15):
-        errors.append('Date must be on or after 2024-03-15')
+        errors.append('ERROR: Date must be on or after 2024-03-15.')
     
     return {
         'valid': len(errors) == 0,

@@ -65,8 +65,8 @@ def search(request: SearchRequest):
         return JSONResponse(
             status_code=400,
             content={
-                "error": "Invalid search parameters",
-                "details": validation['errors']
+                "error": "Invalid search parameters.",
+                "details": validation["errors"]
             }
         )
     
@@ -76,7 +76,7 @@ def search(request: SearchRequest):
             status_code=400,
             content={
                 "error": "Invalid airport code",
-                "details": [f"Airport {origin} not found"]
+                "details": [f"ERROR: Airport {origin} not found. Please enter a valid origin."]
             }
         )
     
@@ -85,7 +85,7 @@ def search(request: SearchRequest):
             status_code=400,
             content={
                 "error": "Invalid airport code",
-                "details": [f"Airport {destination} not found"]
+                "details": [f"ERROR: Airport {destination} not found. Please enter a valid destination."]
             }
         )
     

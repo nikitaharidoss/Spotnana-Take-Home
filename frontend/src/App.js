@@ -77,7 +77,7 @@ function App() {
       if (!response.ok) {
         const errorData = await response.json();
         setError(errorData.details ? errorData.details.join(', ') : 'Search failed');
-        setResults([]);
+        // setResults([]);
       } else {
         const data = await response.json();
         setResults(Array.isArray(data.itineraries) ? data.itineraries : []);
@@ -125,7 +125,7 @@ function App() {
         </main>
 
         <footer className="footer">
-          <p>© 2024 SkyPath Airways. All flights local times.</p>
+          <p>© 2024 SkyPath Airways. All rights reserved.</p>
         </footer>
       </div>
     </div>
