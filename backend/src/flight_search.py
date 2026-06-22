@@ -1,130 +1,83 @@
 from datetime import datetime
 import pytz
+from collections import defaultdict
 from validation import validate_connection
 from utils import format_time, format_duration
 
+MAX_STOPS = 2
+
 
 class FlightSearcher:
-    """Search for flights with direct and connecting routes"""
-    
+    """Search for flights with direct and connecting routes using DFS."""
+
     def __init__(self, flights, airports):
-        self.flights = flights
         self.airports = airports
         self.airport_map = {airport['code']: airport for airport in airports}
-    
+
+        # Adjacency map: origin airport → list of valid flights departing from it.
+        # This replaces O(N) linear scans through self.flights in inner loops.
+        self.flights_by_origin = defaultdict(list)
+        for flight in flights:
+            if (flight['origin'] in self.airport_map
+                    and flight['destination'] in self.airport_map):
+                self.flights_by_origin[flight['origin']].append(flight)
+
     def search(self, origin, destination, date):
-        """Search for flights with connections"""
-        available_flights = self._get_flights_for_date(origin, date)
+        """Search for itineraries up to MAX_STOPS stops using DFS."""
         itineraries = []
-
-        # 1. Direct flights
-        itineraries.extend(self._find_direct_flights(available_flights, destination))
-        
-        # 2. One-stop connections
-        itineraries.extend(self._find_one_stop_flights(available_flights, destination, date))
-        
-        # 3. Two-stop connections
-        itineraries.extend(self._find_two_stop_flights(available_flights, origin, destination, date))
-        
-        # Sort by total duration
+        # Seed DFS with flights departing from origin on the search date.
+        seed_flights = [
+            f for f in self.flights_by_origin[origin]
+            if f['departureTime'].startswith(date)
+        ]
+        for first_flight in seed_flights:
+            self._dfs(
+                current_flight=first_flight,
+                destination=destination,
+                date=date,
+                path=[first_flight],
+                visited={origin},
+                itineraries=itineraries,
+            )
         itineraries.sort(key=lambda x: x['totalDuration'])
-        
         return itineraries
-    
-    def search_2(self, origin, destination, date):
-        """Search for flights with at most two stops"""
-        # This method currently delegates to the main search method, which already handles up to two stops
-        # and returns the same results
 
-        return self.search(origin, destination, date)
-    
-    def _get_flights_for_date(self, depart_airport_code, search_date):
-        """Get flights departing from airport on search date"""
-        result = []
-        for flight in self.flights:
-            if flight['origin'] != depart_airport_code:
+    def _dfs(self, current_flight, destination, date, path, visited, itineraries):
+        """
+        Recursively explore the flight graph depth-first.
+
+        - Appends a completed itinerary when destination is reached.
+        - Prunes branches that exceed MAX_STOPS or revisit airports.
+        """
+        current_dest = current_flight['destination']
+
+        if current_dest == destination:
+            itineraries.append(self._build_itinerary(path))
+            return  # Destination reached; don't extend further.
+
+        # Prune: already at MAX_STOPS intermediate airports.
+        if len(path) > MAX_STOPS:
+            return
+
+        for next_flight in self.flights_by_origin[current_dest]:
+            next_dest = next_flight['destination']
+
+            # Avoid revisiting airports already in the path.
+            if next_dest in visited and next_dest != destination:
                 continue
-            
-            if flight['origin'] not in self.airport_map or flight['destination'] not in self.airport_map:
+
+            # Validate layover rules between current and next flight.
+            if not validate_connection(current_flight, next_flight, self.airport_map, date)['valid']:
                 continue
-            
-            tz = pytz.timezone(self.airport_map[flight['origin']]['timezone'])
-            depart_local = datetime.strptime(flight['departureTime'], '%Y-%m-%dT%H:%M:%S')
-            depart_local = tz.localize(depart_local)
-            
-            if depart_local.strftime('%Y-%m-%d') == search_date:
-                result.append(flight)
-        
-        return result
-    
-    def _find_direct_flights(self, available_flights, destination):
-        """Find direct flights to destination"""
-        itineraries = []
-        for flight in available_flights:
-            if flight['destination'] == destination:
-                itinerary = self._build_itinerary([flight])
-                itineraries.append(itinerary)
-        return itineraries
-    
-    def _find_one_stop_flights(self, available_flights, destination, date):
-        """Find one-stop connecting flights"""
-        itineraries = []
-        for flight1 in available_flights:
-            stop1 = flight1['destination']
-            if stop1 == destination:
-                continue
-            
-            connecting_flights = [
-                f for f in self.flights
-                if f['origin'] == stop1
-                and f['destination'] == destination
-                and f['origin'] in self.airport_map
-                and f['destination'] in self.airport_map
-            ]
-            
-            for flight2 in connecting_flights:
-                validation = validate_connection(flight1, flight2, self.airport_map, date)
-                if validation['valid']:
-                    itinerary = self._build_itinerary([flight1, flight2])
-                    itineraries.append(itinerary)
-        
-        return itineraries
-    
-    def _find_two_stop_flights(self, available_flights, origin, destination, date):
-        """Find two-stop connecting flights"""
-        itineraries = []
-        for flight1 in available_flights:
-            stop1 = flight1['destination']
-            if stop1 == destination:
-                continue
-            
-            for flight2 in self.flights:
-                if (flight2['origin'] != stop1
-                    or flight2['destination'] == origin
-                    or flight2['destination'] == destination
-                    or flight2['origin'] not in self.airport_map
-                    or flight2['destination'] not in self.airport_map):
-                    continue
-                
-                validation1 = validate_connection(flight1, flight2, self.airport_map, date)
-                if not validation1['valid']:
-                    continue
-                
-                stop2 = flight2['destination']
-                
-                for flight3 in self.flights:
-                    if (flight3['origin'] != stop2
-                        or flight3['destination'] != destination
-                        or flight3['origin'] not in self.airport_map
-                        or flight3['destination'] not in self.airport_map):
-                        continue
-                    
-                    validation2 = validate_connection(flight2, flight3, self.airport_map, date)
-                    if validation2['valid']:
-                        itinerary = self._build_itinerary([flight1, flight2, flight3])
-                        itineraries.append(itinerary)
-        
-        return itineraries
+
+            visited.add(current_dest)
+            path.append(next_flight)
+
+            self._dfs(next_flight, destination, date, path, visited, itineraries)
+
+            path.pop()
+            visited.discard(current_dest)
+
     
     def _build_itinerary(self, flight_segments):
         """Build itinerary from flight segments"""
