@@ -9,7 +9,7 @@ from pydantic import BaseModel
 # Add current directory to path for imports
 sys.path.insert(0, os.path.dirname(__file__))
 
-from flight_search import search_flights
+from flight_search import FlightSearcher
 from validation import validate_search_input, airport_exists
 
 # Load flights data
@@ -22,6 +22,8 @@ airports = data['airports']
 
 # Create airport map
 airport_map = {airport['code']: airport for airport in airports}
+
+searcher = FlightSearcher(flights, airports)
 
 # Create FastAPI app
 app = FastAPI(title="SkyPath Flight Search API")
@@ -88,7 +90,7 @@ def search(request: SearchRequest):
         )
     
     try:
-        itineraries = search_flights(origin, destination, date, flights, airports)
+        itineraries = searcher.search(origin, destination, date)
         
         return {
             "search": {

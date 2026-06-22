@@ -160,10 +160,3 @@ class FlightSearcher:
             'totalPrice': f'{total_price:.2f}',
             'stops': len(flight_segments) - 1
         }
-
-
-# Backward-compatible function wrapper for existing code
-def search_flights(origin, destination, date, flights, airports):
-    """Legacy function wrapper - use FlightSearcher class directly"""
-    searcher = FlightSearcher(flights, airports)
-    return searcher.search(origin, destination, date)

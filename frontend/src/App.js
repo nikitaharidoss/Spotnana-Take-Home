@@ -3,12 +3,36 @@ import './App.css';
 import SearchForm from './SearchForm';
 import Results from './Results';
 
+const destinationBackgrounds = [
+  {
+    name: 'Paris',
+    image: 'https://images.unsplash.com/photo-1431274172761-fca41d930114?auto=format&fit=crop&w=1600&q=80'
+  },
+  {
+    name: 'Tokyo',
+    image: 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=1600&q=80'
+  },
+  {
+    name: 'New York',
+    image: 'https://images.unsplash.com/photo-1499092346589-b9b6be3e94b2?auto=format&fit=crop&w=1600&q=80'
+  },
+  {
+    name: 'Sydney',
+    image: 'https://images.unsplash.com/photo-1523428096881-5bd79d043006?auto=format&fit=crop&w=1600&q=80'
+  },
+  {
+    name: 'Dubai',
+    image: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=1600&q=80'
+  }
+];
+
 function App() {
   const [searchParams, setSearchParams] = useState(null);
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [airports, setAirports] = useState([]);
+  const [activeBackgroundIndex, setActiveBackgroundIndex] = useState(0);
 
   // Fetch available airports on mount
   useEffect(() => {
@@ -23,6 +47,16 @@ function App() {
     };
 
     fetchAirports();
+  }, []);
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setActiveBackgroundIndex(
+        (currentIndex) => (currentIndex + 1) % destinationBackgrounds.length
+      );
+    }, 8000);
+
+    return () => clearInterval(intervalId);
   }, []);
 
   const handleSearch = async (params) => {
@@ -59,30 +93,45 @@ function App() {
 
   return (
     <div className="app">
-      <header className="header">
-        <h1>✈️ SkyPath</h1>
-        <p>Flight Connection Search Engine</p>
-      </header>
-
-      <main className="main">
-        <SearchForm onSearch={handleSearch} airports={airports} />
-
-        {error && <div className="error-message">{error}</div>}
-
-        {loading && <div className="loading">Searching flights...</div>}
-
-        {results && (
-          <Results 
-            searchParams={searchParams}
-            itineraries={results}
-            airports={airports}
+      <div className="background-rotator" aria-hidden="true">
+        {destinationBackgrounds.map((background, index) => (
+          <div
+            key={background.name}
+            className={`bg-slide ${index === activeBackgroundIndex ? 'active' : ''}`}
+            style={{ backgroundImage: `url(${background.image})` }}
           />
-        )}
-      </main>
+        ))}
+      </div>
 
-      <footer className="footer">
-        <p>© 2024 SkyPath Airways. All flights local times.</p>
-      </footer>
+      <div className="app-content">
+        <header className="header">
+          <h1>✈️ SkyPath</h1>
+          <p>Flight Connection Search Engine</p>
+          <span className="destination-badge">
+            Exploring {destinationBackgrounds[activeBackgroundIndex].name}
+          </span>
+        </header>
+
+        <main className="main">
+          <SearchForm onSearch={handleSearch} airports={airports} />
+
+          {error && <div className="error-message">{error}</div>}
+
+          {loading && <div className="loading">Searching flights...</div>}
+
+          {results && (
+            <Results
+              searchParams={searchParams}
+              itineraries={results}
+              airports={airports}
+            />
+          )}
+        </main>
+
+        <footer className="footer">
+          <p>© 2024 SkyPath Airways. All flights local times.</p>
+        </footer>
+      </div>
     </div>
   );
 }
