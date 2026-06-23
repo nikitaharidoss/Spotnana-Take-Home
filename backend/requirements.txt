@@ -2,3 +2,5 @@ fastapi==0.104.1
 uvicorn[standard]==0.24.0
 python-multipart==0.0.6
 pytz==2023.3
+pytest==8.3.2
+httpx==0.24.1
