@@ -1,12 +1,12 @@
 from datetime import datetime
-import pytz
+from zoneinfo import ZoneInfo
 
 
 def format_time(iso_time_str, timezone):
     """Format time for display (local time)"""
     dt = datetime.strptime(iso_time_str, '%Y-%m-%dT%H:%M:%S')
-    tz = pytz.timezone(timezone)
-    local_dt = tz.localize(dt)
+    tz = ZoneInfo(timezone)
+    local_dt = dt.replace(tzinfo=tz)
     return local_dt.strftime('%H:%M')
 
 

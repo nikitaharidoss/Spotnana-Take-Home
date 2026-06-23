@@ -1,5 +1,6 @@
 from datetime import datetime
 import pytz
+from zoneinfo import ZoneInfo
 from collections import defaultdict
 from validation import validate_connection
 from utils import format_time, format_duration
@@ -90,22 +91,22 @@ class FlightSearcher:
             dest_airport = self.airport_map[flight['destination']]
             
             # Parse times in local airport timezone
-            tz_origin = pytz.timezone(origin_airport['timezone'])
-            tz_dest = pytz.timezone(dest_airport['timezone'])
+            tz_origin = ZoneInfo(origin_airport['timezone'])
+            tz_dest = ZoneInfo(dest_airport['timezone'])
             
             depart_local = datetime.strptime(
                 flight['departureTime'],
                 '%Y-%m-%dT%H:%M:%S'
             )
-            depart_local = tz_origin.localize(depart_local)
-            depart_utc = depart_local.astimezone(pytz.utc)
+            depart_local = depart_local.replace(tzinfo=tz_origin)
+            depart_utc = depart_local.astimezone(ZoneInfo('UTC'))
             
             arrive_local = datetime.strptime(
                 flight['arrivalTime'],
                 '%Y-%m-%dT%H:%M:%S'
             )
-            arrive_local = tz_dest.localize(arrive_local)
-            arrive_utc = arrive_local.astimezone(pytz.utc)
+            arrive_local = arrive_local.replace(tzinfo=tz_dest)
+            arrive_utc = arrive_local.astimezone(ZoneInfo('UTC'))
             
             flight_duration_minutes = int((arrive_utc - depart_utc).total_seconds() / 60)
             
