@@ -10,6 +10,10 @@ docker-compose up
 
 Then open your browser to **http://localhost:3000**
 
+Backend is running on http://localhost:5001. 
+
+If needed can change frontend port in package.json line 6, and backend port in /backend/src/main.py line 115.
+
 ## 📁 Project Structure
 
 ```
